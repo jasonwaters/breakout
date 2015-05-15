@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Breakout!</title>
+		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<!-- http://billmill.org/static/canvastutorial/index.html -->
+		<!-- https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API -->
+		<style type="text/css">
+			canvas {
+				border: 1px solid black;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas" width="800" height="600"></canvas>
+
+		<script type="text/javascript">
+			var ctx, ball, paddle, WIDTH, HEIGHT;
+			ball = {
+				"x": 0,
+				"y": 0,
+				"xVelocity": 1,
+				"yVelocity": 1
+			};
+
+			paddle = {
+				"x": 0,
+				"y": 580,
+				'width': 100,
+				'height': 10
+			};
+
+			function init() {
+ 				ctx = $('#canvas')[0].getContext("2d");
+ 				WIDTH = $('#canvas').width();
+ 				HEIGHT = $('#canvas').height();
+
+				paddle.y = HEIGHT - paddle.height;
+
+ 				return setInterval(draw, 1);
+			}
+
+			function drawCircle(x, y, r, color) {
+				if(color) {
+					ctx.fillStyle = color;				
+				}
+				
+				ctx.beginPath();
+				ctx.arc(x, y, r, 0, Math.PI*2, true);
+				ctx.closePath();
+
+				ctx.fill();
+			}
+
+
+			function drawRect(x, y, w, h, color) {
+				if(color) {
+					ctx.fillStyle = color;				
+				}
+				
+				ctx.beginPath();
+				ctx.rect(x, y, w, h);
+				ctx.closePath();
+
+				ctx.fill();
+			}
+
+			function clear() {
+				ctx.clearRect(0,0, WIDTH, HEIGHT);
+			}
+
+			function draw() {
+				clear();
+				drawCircle(ball.x, ball.y, 20, 'purple');
+
+				drawRect(paddle.x, paddle.y, paddle.width, paddle.height, 'orange');
+
+				ball.x += parseFloat(ball.xVelocity);
+				ball.y += parseFloat(ball.yVelocity);
+
+				if((ball.x + 20 + ball.xVelocity)>WIDTH) {
+					ball['xVelocity'] = ball['xVelocity'] * -1;
+				}
+
+				if(ball.x-20<0) {
+					ball['xVelocity'] = Math.abs(ball['xVelocity']);
+				}
+
+				if(ball.y+20+ball.yVelocity>HEIGHT) {
+					ball['yVelocity'] = ball['yVelocity'] * -1;
+				}
+
+				if(ball.y-20<0) {
+					ball['yVelocity'] = Math.abs(ball['yVelocity']);
+				}
+			}
+
+
+			init();
+		</script>
+	</body>
+</html>
