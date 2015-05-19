@@ -13,39 +13,55 @@
 		</style>
 	</head>
 	<body>
-		<canvas id="canvas" width="800" height="600"></canvas>
+		<canvas id="canvas" width="400" height="300"></canvas>
 
 		<script type="text/javascript">
-			var ctx, ball, paddle, WIDTH, HEIGHT, intervalId;
+			var ctx,
+				ball,
+				paddle,
+				bricks,
+				STAGE_WIDTH,
+				STAGE_HEIGHT,
+				BRICK_WIDTH=75,
+				BRICK_HEIGHT=15,
+				BRICK_PADDING=4,
+				intervalId;
+
 			ball = {
 				"x": 0,
 				"y": 0,
 				"xVelocity": 1,
 				"yVelocity": 1,
-				'radius': 20
+				'radius': 6
 			};
 
 			paddle = {
-				"x": 550,
-				"y": 580,
-				'width': 100,
+				"x": 240,
+				"y": 290,
+				'width': 75,
 				'height': 10,
 				'xVelocity': 0
 			};
 
+			bricks = {
+				"numColumns": 5,
+				"numRows": 5,
+				'rows': []
+			};
+
 			function init() {
  				ctx = $('#canvas')[0].getContext("2d");
- 				WIDTH = $('#canvas').width();
- 				HEIGHT = $('#canvas').height();
+ 				STAGE_WIDTH = $('#canvas').width();
+ 				STAGE_HEIGHT = $('#canvas').height();
 
-				paddle.y = HEIGHT - paddle.height;
+				paddle.y = STAGE_HEIGHT - paddle.height;
 
 				$('body').keydown(function(evt) {
 					//right
 					if(evt.which == 39) {
-						paddle.xVelocity = 4;
+						paddle.xVelocity = 3;
 					}else if(evt.which == 37) {
-						paddle.xVelocity = -4;
+						paddle.xVelocity = -3;
 					}
 				});
 
@@ -53,7 +69,18 @@
 					paddle.xVelocity = 0;
 				});
 
+				initBricks();
+
  				return setInterval(draw, 1);
+			}
+
+			function initBricks() {
+				for(var row=0;row<bricks.numRows;row++) {
+					bricks.rows[row] = [];
+					for(var col=0;col<bricks.numColumns;col++) {
+						bricks.rows[row][col] = 1;
+					}
+				}
 			}
 
 			function drawCircle(x, y, r, color) {
@@ -82,20 +109,39 @@
 			}
 
 			function clear() {
-				ctx.clearRect(0,0, WIDTH, HEIGHT);
+				ctx.clearRect(0,0, STAGE_WIDTH, STAGE_HEIGHT);
+			}
+
+			function drawBricks() {
+				for(var y=0;y<bricks.rows.length;y++) {
+					for(var x=0;x<bricks.rows[y].length;x++) {
+						if(bricks.rows[y][x] == 1) {
+							drawRect((x*(BRICK_WIDTH+BRICK_PADDING))+BRICK_PADDING, (y*(BRICK_HEIGHT+BRICK_PADDING)+BRICK_PADDING), BRICK_WIDTH, BRICK_HEIGHT, 'green');
+						}
+					}
+				}
 			}
 
 			function draw() {
 				clear();
+
+				//draw ball
 				drawCircle(ball.x, ball.y, ball.radius, 'blue');
+
+				//draw paddle
 				drawRect(paddle.x, paddle.y, paddle.width, paddle.height, 'orange');
+
+				//draw bricks
+				drawBricks();
+
 
 				ball.x += ball.xVelocity;
 				ball.y += ball.yVelocity;
 
 				paddle.x += paddle.xVelocity;
 
-				if((ball.x + ball.radius + ball.xVelocity)>WIDTH) {
+
+				if((ball.x + ball.radius + ball.xVelocity)>STAGE_WIDTH) {
 					ball['xVelocity'] = Math.abs(ball['xVelocity']) * -1;
 				}
 
