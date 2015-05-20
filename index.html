@@ -4,10 +4,12 @@
 		<meta charset="UTF-8">
 		<title>Breakout!</title>
 		<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
-		<!-- http://billmill.org/static/canvastutorial/index.html -->
-		<!-- https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API -->
 		<style type="text/css">
+			body {
+				background: #FFFFFF;
+			}
 			canvas {
+				background-color: #000000;
 				border: 1px solid black;
 			}
 		</style>
@@ -19,20 +21,19 @@
 			var ctx,
 				ball,
 				paddle,
+				brick,
 				bricks,
 				STAGE_WIDTH,
 				STAGE_HEIGHT,
-				BRICK_WIDTH=75,
-				BRICK_HEIGHT=15,
-				BRICK_PADDING=4,
 				intervalId;
 
 			ball = {
-				"x": 0,
-				"y": 0,
-				"xVelocity": 1,
-				"yVelocity": 1,
-				'radius': 6
+				"x": 100,
+				"y": 100,
+				"xVelocity": 1.5,
+				"yVelocity": 1.5,
+				'radius': 6,
+				'color': "#FFFFFF"
 			};
 
 			paddle = {
@@ -40,12 +41,23 @@
 				"y": 290,
 				'width': 75,
 				'height': 10,
-				'xVelocity': 0
+				'xVelocity': 0,
+				'color': "#FFFFFF"
+			};
+
+			brick = {
+				'padding': 1,
+				'width': 79,
+				'height': 15
+
 			};
 
 			bricks = {
 				"numColumns": 5,
 				"numRows": 5,
+				'rowColors': ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"],
+				'rowHeight': brick.height + brick.padding,
+				'columnWidth': brick.width + brick.padding,
 				'rows': []
 			};
 
@@ -116,7 +128,11 @@
 				for(var y=0;y<bricks.rows.length;y++) {
 					for(var x=0;x<bricks.rows[y].length;x++) {
 						if(bricks.rows[y][x] == 1) {
-							drawRect((x*(BRICK_WIDTH+BRICK_PADDING))+BRICK_PADDING, (y*(BRICK_HEIGHT+BRICK_PADDING)+BRICK_PADDING), BRICK_WIDTH, BRICK_HEIGHT, 'green');
+							drawRect((x*bricks.columnWidth)+brick.padding,
+									y*bricks.rowHeight+brick.padding,
+									brick.width,
+									brick.height,
+									bricks.rowColors[y]);
 						}
 					}
 				}
@@ -126,27 +142,34 @@
 				clear();
 
 				//draw ball
-				drawCircle(ball.x, ball.y, ball.radius, 'blue');
+				drawCircle(ball.x, ball.y, ball.radius, ball.color);
 
 				//draw paddle
-				drawRect(paddle.x, paddle.y, paddle.width, paddle.height, 'orange');
+				drawRect(paddle.x, paddle.y, paddle.width, paddle.height, paddle.color);
 
 				//draw bricks
 				drawBricks();
-
 
 				ball.x += ball.xVelocity;
 				ball.y += ball.yVelocity;
 
 				paddle.x += paddle.xVelocity;
 
+				ball.row = Math.floor(ball.y/bricks.rowHeight);
+				ball.col = Math.floor(ball.x/bricks.columnWidth);
+
+				//reverse the ball and mark the brick as broken
+				if(ball.row <= bricks.numRows-1 && bricks.rows[ball.row][ball.col]) {
+					bricks.rows[ball.row][ball.col] = 0;
+					ball.yVelocity = ball.yVelocity * -1;
+				}
 
 				if((ball.x + ball.radius + ball.xVelocity)>STAGE_WIDTH) {
-					ball['xVelocity'] = Math.abs(ball['xVelocity']) * -1;
+					ball.xVelocity = Math.abs(ball.xVelocity) * -1;
 				}
 
 				if(ball.x-ball.radius<0) {
-					ball['xVelocity'] = Math.abs(ball['xVelocity']);
+					ball.xVelocity = Math.abs(ball.xVelocity);
 				}
 
 				//paddle
@@ -155,15 +178,15 @@
 					clearInterval(intervalId);
 				}else if(ball.y+ball.radius+ball.yVelocity>paddle.y) {
 					if(ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
-						ball['yVelocity'] = Math.abs(ball['yVelocity']) * -1;
+						ball.yVelocity = Math.abs(ball.yVelocity) * -1;
+						ball.xVelocity = 8 * (ball.x - (paddle.x + (paddle.width/2)))/paddle.width;
 					}
 				}
 
 				if(ball.y-ball.radius<0) {
-					ball['yVelocity'] = Math.abs(ball['yVelocity']);
+					ball.yVelocity = Math.abs(ball.yVelocity);
 				}
 			}
-
 
 			intervalId = init();
 		</script>
